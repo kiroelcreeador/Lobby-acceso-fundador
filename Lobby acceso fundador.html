@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lobby de Creadores | Acceso fundador</title>
+<meta name="description" content="Entra al acceso fundador de Lobby de Creadores: precio fundador protegido y acceso prioritario a la apertura.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFDF8;
+    --ink:#202126;
+    --muted:#6B6A66;
+    --accent:#FFD84D;
+    --line:rgba(32,33,38,.14);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    padding:max(14px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  main{width:100%;max-width:440px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2vh,16px)}
+
+  .tag{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+       background:var(--accent);color:var(--ink);padding:7px 14px;border-radius:999px}
+  h1{font-weight:800;letter-spacing:-.03em;line-height:1.05;font-size:clamp(30px,9vw,46px)}
+  h1 mark{background:linear-gradient(transparent 58%,var(--accent) 58%);color:inherit;padding:0 2px}
+  .sub{font-size:clamp(15px,4vw,17px);color:var(--muted);line-height:1.4;max-width:36ch}
+  .sub b{color:var(--ink);font-weight:600}
+
+  .perks{list-style:none;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  .perks li{font-size:12.5px;font-weight:500;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px}
+  .perks li::before{content:"✓ ";font-weight:800}
+
+  .cd{display:flex;gap:8px;justify-content:center}
+  .cd div{background:var(--ink);color:#fff;border-radius:12px;min-width:58px;padding:8px 4px}
+  .cd b{display:block;font-size:22px;font-weight:800;line-height:1}
+  .cd span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.75}
+
+  /* Video: solo visible en la ruta ?src=reel */
+  .vid{display:none;width:100%;align-items:center;justify-content:center}
+  body.v .vid{display:flex}
+  body.v .perks, body.v .cd{display:none}
+  .vbox{
+    position:relative;height:clamp(170px,31vh,270px);aspect-ratio:9/16;
+    border-radius:var(--radius);overflow:hidden;background:var(--ink);
+    border:1.5px solid var(--line);cursor:pointer;
+    background-size:cover;background-position:center;
+  }
+  .vbox.empty{cursor:default}
+  .vbox button.play{
+    position:absolute;inset:0;margin:auto;width:58px;height:58px;border-radius:50%;
+    background:var(--accent);color:var(--ink);font-size:22px;display:flex;align-items:center;justify-content:center;
+    animation:none;padding:0;border:0;
+  }
+  .vbox .cap{position:absolute;left:0;right:0;bottom:10px;font-size:12px;font-weight:600;color:#fff}
+  .vbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+  form{width:100%;display:flex;flex-direction:column;gap:9px}
+  input[type=email],input[type=text].q{
+    width:100%;font:inherit;font-size:16px;color:var(--ink);
+    padding:15px 17px;border:1.5px solid var(--line);border-radius:var(--radius);
+    background:#fff;outline:none;transition:border-color .15s, box-shadow .15s;
+  }
+  input::placeholder{color:#9a9892}
+  input[type=email]:focus,input[type=text].q:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(255,216,77,.55)}
+  button.cta{
+    font:inherit;font-weight:800;font-size:16px;letter-spacing:.01em;
+    background:var(--accent);color:var(--ink);border:0;border-radius:var(--radius);
+    padding:16px 18px;cursor:pointer;animation:pulse 2.4s ease-in-out infinite;transition:transform .12s ease;
+  }
+  button.cta:hover{transform:translateY(-1px)}
+  button.cta[disabled]{opacity:.7;cursor:progress;animation:none}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,216,77,.75)}
+    70%{box-shadow:0 0 0 14px rgba(255,216,77,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,216,77,0)}
+  }
+  @media (prefers-reduced-motion:reduce){button.cta{animation:none}}
+  @media (max-height:640px){.perks{display:none}}
+  @media (max-height:700px){body.v input.q{display:none}}
+
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+  .msg{min-height:16px;font-size:13px;color:#B42318;font-weight:500}
+  .fine{font-size:12px;color:var(--muted);line-height:1.5}
+  .fine a{color:var(--muted)}
+
+  .ok{display:none;flex-direction:column;gap:12px;align-items:center;width:100%}
+  .ok h2{font-size:clamp(24px,7vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .ok p{color:var(--muted);font-size:15px;line-height:1.45;max-width:34ch}
+  .ok a.wa{display:none;text-decoration:none;background:var(--accent);color:var(--ink);font-weight:800;
+           padding:16px 22px;border-radius:var(--radius);width:100%}
+  .ok .opt{font-size:12px;color:var(--muted)}
+  body.done #pitch{display:none}
+  body.done .ok{display:flex}
+</style>
+</head>
+<body>
+<main>
+  <div id="pitch" style="display:contents">
+    <span class="tag">Acceso fundador</span>
+    <h1>Vende con contenido <mark>sin depender de aparecer</mark></h1>
+    <p class="sub">Lobby de Creadores abre el <b id="fechaTxt">19 de octubre</b>. Entra a la lista y asegura tu precio fundador.</p>
+
+    <div class="vid" id="vid">
+      <div class="vbox empty" id="vbox" role="group" aria-label="Video de adelanto">
+        <button type="button" class="play" id="play" aria-label="Reproducir video" tabindex="-1">▶</button>
+        <span class="cap" id="cap">Video próximamente</span>
+      </div>
+    </div>
+
+    <ul class="perks">
+      <li>Precio fundador protegido</li>
+      <li>Acceso prioritario</li>
+      <li>Avances de la construcción</li>
+    </ul>
+
+    <div class="cd" id="cd" aria-label="Tiempo para la apertura">
+      <div><b data-k="d">00</b><span>Días</span></div>
+      <div><b data-k="h">00</b><span>Horas</span></div>
+      <div><b data-k="m">00</b><span>Min</span></div>
+      <div><b data-k="s">00</b><span>Seg</span></div>
+    </div>
+
+    <form id="f" novalidate>
+      <input type="email" id="email" placeholder="Tu mejor correo" autocomplete="email" inputmode="email" required aria-label="Correo electrónico">
+      <input class="q" type="text" id="resp" placeholder="Opcional: ¿qué vendes y qué te frena hoy?" maxlength="300" aria-label="Qué vendes y qué te frena hoy (opcional)">
+      <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" class="cta" id="btn">QUIERO MI LUGAR FUNDADOR</button>
+      <div class="msg" id="msg" role="alert" aria-live="polite"></div>
+    </form>
+
+    <p class="fine">Sin spam. Te das de baja cuando quieras.<br>
+      <a href="{{URL_PRIVACIDAD}}">Privacidad</a> · <a href="{{URL_TERMINOS}}">Términos</a></p>
+  </div>
+
+  <div class="ok" id="ok">
+    <span class="tag">Lugar confirmado</span>
+    <h2>Ya estás en la lista fundadora</h2>
+    <p>Te avisaré por correo cuando abra Lobby de Creadores, antes que al resto. Revisa también la carpeta de spam.</p>
+    <a class="wa" id="wa" href="#" target="_blank" rel="noopener">Recibir avisos por WhatsApp</a>
+    <span class="opt" id="waNote" style="display:none">Opcional. Solo recibirás la fecha y los avisos de apertura.</span>
+  </div>
+</main>
+
+<script>
+/* ===================== CONFIGURACIÓN =====================
+   FORM_ACTION : URL del Google Form terminada en /formResponse
+   ENTRY_EMAIL : ID del campo correo            (entry.XXXXXXXXXX)
+   ENTRY_RESP  : ID del campo opcional          (entry.XXXXXXXXXX)
+   ENTRY_SRC   : ID del campo "fuente" (pregunta de respuesta corta)
+   OPEN_DATE   : fecha real de apertura (hora de México, UTC-6)
+   OPEN_TEXT   : cómo se muestra la fecha
+   VIDEO_ID    : ID de YouTube del video de adelanto (vacío = "Video próximamente")
+   WHATSAPP_URL: link del canal/grupo de avisos (vacío = botón oculto)
+
+   RUTAS por enlace:
+     tu-pagina.vercel.app/?src=reel  -> muestra el video (ruta A)
+     tu-pagina.vercel.app/?src=lm    -> sin video (ruta B)
+     tu-pagina.vercel.app/           -> sin video, fuente "directo"
+========================================================= */
+var FORM_ACTION  = 'https://docs.google.com/forms/d/e/1FAIpQLSf0QEdNStMd_SjGYycx5Z7bngz10v06JeNK472q-fwXpLtKSg/formResponse';
+var ENTRY_EMAIL  = 'entry.1496002457';
+var ENTRY_RESP   = 'entry.723845661';
+var ENTRY_SRC    = 'entry.0000000002';
+var OPEN_DATE    = '2026-10-19T09:00:00-06:00';
+var OPEN_TEXT    = '19 de octubre';
+var VIDEO_ID     = '';
+var WHATSAPP_URL = '';
+
+document.getElementById('fechaTxt').textContent = OPEN_TEXT;
+
+/* Fuente de la visita */
+var params = new URLSearchParams(location.search);
+var SRC = (params.get('src') || 'directo').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,30) || 'directo';
+if (SRC === 'reel') document.body.classList.add('v');
+
+/* Video */
+(function(){
+  var box = document.getElementById('vbox'), play = document.getElementById('play'), cap = document.getElementById('cap');
+  if (!VIDEO_ID) return;
+  box.classList.remove('empty');
+  box.style.backgroundImage = 'url(https://i.ytimg.com/vi/' + encodeURIComponent(VIDEO_ID) + '/hqdefault.jpg)';
+  cap.textContent = 'Ver adelanto';
+  play.tabIndex = 0;
+  function load(){
+    box.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(VIDEO_ID) +
+      '?autoplay=1&rel=0&playsinline=1&modestbranding=1" title="Adelanto de Lobby de Creadores" ' +
+      'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+    box.style.cursor = 'default';
+    box.removeEventListener('click', load);
+  }
+  box.addEventListener('click', load);
+})();
+
+/* Countdown hacia la apertura (fecha fija real) */
+(function(){
+  var target = new Date(OPEN_DATE).getTime(), box = document.getElementById('cd');
+  if (!target || isNaN(target) || target <= Date.now()){ box.style.display='none'; return; }
+  function pad(n){return String(n).padStart(2,'0');}
+  function q(k,v){var el=box.querySelector('[data-k="'+k+'"]'); if(el) el.textContent=pad(v);}
+  function tick(){
+    var s = Math.max(0, Math.floor((target - Date.now())/1000));
+    q('d',Math.floor(s/86400)); q('h',Math.floor(s%86400/3600)); q('m',Math.floor(s%3600/60)); q('s',s%60);
+    if (s===0) box.style.display='none';
+  }
+  tick(); setInterval(tick,1000);
+})();
+
+/* WhatsApp en la confirmación (opcional) */
+if (WHATSAPP_URL){
+  var wa = document.getElementById('wa'); wa.href = WHATSAPP_URL; wa.style.display = 'block';
+  document.getElementById('waNote').style.display = 'block';
+}
+
+var f=document.getElementById('f'), email=document.getElementById('email'),
+    msg=document.getElementById('msg'), btn=document.getElementById('btn');
+
+f.addEventListener('submit', function(e){
+  e.preventDefault(); msg.textContent='';
+  if (document.getElementById('website').value) return;
+  var v = email.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ msg.textContent='Escribe un correo válido.'; email.focus(); return; }
+  if (FORM_ACTION.indexOf('PEGA_AQUI')===0){ msg.textContent='Formulario sin conectar: falta configurar FORM_ACTION.'; return; }
+  btn.disabled=true; btn.textContent='ENVIANDO…';
+  var body = new URLSearchParams();
+  body.append(ENTRY_EMAIL, v);
+  var r = document.getElementById('resp').value.trim();
+  if (r) body.append(ENTRY_RESP, r);
+  if (ENTRY_SRC !== 'entry.0000000002') body.append(ENTRY_SRC, SRC);
+  fetch(FORM_ACTION,{method:'POST',mode:'no-cors',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+   .then(function(){ document.body.classList.add('done'); })
+   .catch(function(){
+      btn.disabled=false; btn.textContent='QUIERO MI LUGAR FUNDADOR';
+      msg.textContent='No se pudo enviar. Inténtalo de nuevo.';
+   });
+});
+</script>
+</body>
+</html>

@@ -94,12 +94,28 @@
   .fine{font-size:12px;color:var(--muted);line-height:1.5}
   .fine a{color:var(--muted)}
 
-  .ok{display:none;flex-direction:column;gap:12px;align-items:center;width:100%}
-  .ok h2{font-size:clamp(24px,7vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
-  .ok p{color:var(--muted);font-size:15px;line-height:1.45;max-width:34ch}
-  .ok a.wa{display:none;text-decoration:none;background:var(--accent);color:var(--ink);font-weight:800;
-           padding:16px 22px;border-radius:var(--radius);width:100%}
-  .ok .opt{font-size:12px;color:var(--muted)}
+  .ok{display:none;flex-direction:column;gap:14px;align-items:center;width:100%;padding:8px 0}
+  .ok .check{width:84px;height:84px;border-radius:50%;background:#16A34A;display:flex;align-items:center;justify-content:center;
+             box-shadow:0 0 0 10px rgba(22,163,74,.14);margin-bottom:6px}
+  .ok .check svg{width:44px;height:44px;display:block}
+  .ok .check path{stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;fill:none;
+                  stroke-dasharray:48;stroke-dashoffset:0}
+  @media (prefers-reduced-motion:no-preference){
+    body.done .ok .check{animation:pop .35s ease-out both}
+    body.done .ok .check path{stroke-dashoffset:48;animation:draw .4s .25s ease-out forwards}
+  }
+  @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .ok h2{font-size:clamp(28px,8vw,36px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .ok p{color:var(--muted);font-size:16px;line-height:1.45;max-width:30ch}
+  .ok .wa-block{display:none;flex-direction:column;align-items:center;gap:14px;width:100%}
+  body.wa .ok .wa-block{display:flex}
+  .ok a.wa{display:block;text-align:center;text-decoration:none;background:#15803D;color:#fff;font-weight:800;font-size:16px;
+           padding:16px 22px;border-radius:var(--radius);width:100%;transition:transform .12s ease}
+  .ok a.wa:hover{transform:translateY(-1px)}
+  .ok button.back{font:inherit;font-size:14px;font-weight:500;color:var(--muted);background:none;border:0;
+                  padding:8px 12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;animation:none}
+  .ok button.back:hover{color:var(--ink)}
   #pitch{display:contents}
   body.done #pitch{display:none}
   body.done .ok{display:flex}
@@ -134,7 +150,7 @@
 
     <form id="f" novalidate>
       <input type="email" id="email" placeholder="Tu mejor correo" autocomplete="email" inputmode="email" required aria-label="Correo electrónico">
-      <input class="q" type="text" id="resp" placeholder="Opcional: ¿qué vendes y qué te frena hoy?" maxlength="300" aria-label="Qué vendes y qué te frena hoy (opcional)">
+      <input class="q" type="text" id="resp" placeholder="Opcional: ¿qué vendes y qué te frena?" maxlength="300" aria-label="Qué vendes y qué te frena hoy (opcional)">
       <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit" class="cta" id="btn">QUIERO MI LUGAR FUNDADOR</button>
       <div class="msg" id="msg" role="alert" aria-live="polite"></div>
@@ -144,12 +160,16 @@
       <a href="{{URL_PRIVACIDAD}}">Privacidad</a> · <a href="{{URL_TERMINOS}}">Términos</a></p>
   </div>
 
-  <div class="ok" id="ok">
-    <span class="tag">Lugar confirmado</span>
-    <h2>Ya estás en la lista fundadora</h2>
-    <p>Te avisaré por correo cuando abra Lobby de Creadores, antes que al resto. Revisa también la carpeta de spam.</p>
-    <a class="wa" id="wa" href="#" target="_blank" rel="noopener">Recibir avisos por WhatsApp</a>
-    <span class="opt" id="waNote" style="display:none">Opcional. Solo recibirás la fecha y los avisos de apertura.</span>
+  <div class="ok" id="ok" role="status" aria-live="polite">
+    <div class="check" aria-hidden="true">
+      <svg viewBox="0 0 44 44"><path d="M11 23.5l8 8L33.5 14"/></svg>
+    </div>
+    <h2>Enviado</h2>
+    <div class="wa-block">
+      <p>Únete al grupo de WhatsApp oficial para mantenerte al tanto.</p>
+      <a class="wa" id="wa" href="#" target="_blank" rel="noopener">Unirme al grupo de WhatsApp</a>
+    </div>
+    <button type="button" class="back" id="back">Regresar a la página principal</button>
   </div>
 </main>
 
@@ -162,7 +182,7 @@
    OPEN_DATE   : fecha real de apertura (hora de México, UTC-6)
    OPEN_TEXT   : cómo se muestra la fecha
    VIDEO_ID    : ID de YouTube del video de adelanto (vacío = "Video próximamente")
-   WHATSAPP_URL: link del canal/grupo de avisos (vacío = botón oculto)
+   WHATSAPP_URL: link del grupo de WhatsApp (vacío = se oculta el bloque de WhatsApp)
 
    RUTAS por enlace:
      tu-pagina.vercel.app/?src=reel  -> muestra el video (ruta A)
@@ -217,14 +237,28 @@ if (SRC === 'reel') document.body.classList.add('v');
   tick(); setInterval(tick,1000);
 })();
 
-/* WhatsApp en la confirmación (opcional) */
+/* WhatsApp en la confirmación: solo se muestra si hay enlace.
+   Para ver el diseño sin enviar nada: tu-pagina.vercel.app/?preview=ok */
+var PREVIEW = params.get('preview') === 'ok';
 if (WHATSAPP_URL){
-  var wa = document.getElementById('wa'); wa.href = WHATSAPP_URL; wa.style.display = 'block';
-  document.getElementById('waNote').style.display = 'block';
+  document.getElementById('wa').href = WHATSAPP_URL;
+  document.body.classList.add('wa');
+} else if (PREVIEW){
+  document.body.classList.add('wa');
 }
+if (PREVIEW) document.body.classList.add('done');
 
 var f=document.getElementById('f'), email=document.getElementById('email'),
     msg=document.getElementById('msg'), btn=document.getElementById('btn');
+
+/* Regresar a la página principal */
+document.getElementById('back').addEventListener('click', function(){
+  document.body.classList.remove('done');
+  f.reset();
+  btn.disabled=false; btn.textContent='QUIERO MI LUGAR FUNDADOR';
+  msg.textContent='';
+  window.scrollTo(0,0);
+});
 
 f.addEventListener('submit', function(e){
   e.preventDefault(); msg.textContent='';
@@ -240,7 +274,7 @@ f.addEventListener('submit', function(e){
   if (ENTRY_SRC !== 'entry.0000000002') body.append(ENTRY_SRC, SRC);
   fetch(FORM_ACTION,{method:'POST',mode:'no-cors',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
-   .then(function(){ document.body.classList.add('done'); })
+   .then(function(){ document.body.classList.add('done'); window.scrollTo(0,0); })
    .catch(function(){
       btn.disabled=false; btn.textContent='QUIERO MI LUGAR FUNDADOR';
       msg.textContent='No se pudo enviar. Inténtalo de nuevo.';
